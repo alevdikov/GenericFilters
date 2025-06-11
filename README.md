@@ -1,0 +1,3 @@
+<b>GenericFilters</b> is a small C# library which provides a generic Filter class.<br>
+With that class you can configure filters based on you model class, and it will generate a Linq query expression that can be either direcly used in your Linq query, or can be passed to any ORM, e.g EntityFramework, CosmosDB SDK GetItemLinqQueriable method, used with Dapper etc.<br>
+You don't need to worry about to building conditions. it provided functionality for basic use-case scenarios our of the box, and if you need, you still be able to implement more complex scenarios using Attributes applied to your model's class properties, or even implement fully custom behaviour overriding Filter class methods.   
