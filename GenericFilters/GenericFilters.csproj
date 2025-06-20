@@ -11,6 +11,7 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Description>GenericFilters is a simple library provides a generic Filter class, that allows to 
 configure filters based on you model, and generate a Linq query expression automatically</Description>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +27,10 @@ configure filters based on you model, and generate a Linq query expression autom
 
   <ItemGroup>
     <PackageReference Include="LinqKit.Core" Version="1.2.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="GenericFilters.Tests" />
   </ItemGroup>
 
 </Project>
