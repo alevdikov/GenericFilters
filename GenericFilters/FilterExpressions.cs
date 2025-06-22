@@ -127,77 +127,45 @@ internal static class FilterExpressions<TModel> where TModel : class
         return lambda;
     }
 
-    internal static Expression<Func<TModel, bool>> GetDateExpression(string propertyName, DateTime filterValue, ComparisonOperation operation)
+    internal static Expression<Func<TModel, bool>> GetComparisonExpression<TProperty>(
+        string propertyName,
+        TProperty filterValue,
+        ComparisonOperation operation)
     {
-        var parameterExpression = Expression.Parameter(typeof(TModel));
-        var property = Expression.Property(parameterExpression, propertyName);
-        var value = Expression.Constant(filterValue, typeof(DateTime));
+        var parameter = Expression.Parameter(typeof(TModel), "x");
+        var property = Expression.Property(parameter, propertyName);
+        var value = Expression.Constant(filterValue, typeof(TProperty));
 
-        BinaryExpression expression;
+        // Get the underlying type if nullable
+        var propertyType = Nullable.GetUnderlyingType(property.Type) ?? property.Type;
+        var filterType = Nullable.GetUnderlyingType(typeof(TProperty)) ?? typeof(TProperty);
 
-        switch (operation)
+        // Ensure types are compatible
+        if (!propertyType.IsAssignableFrom(filterType))
         {
-            case ComparisonOperation.Equality:
-                expression = Expression.Equal(property, value);
-                break;
-            case ComparisonOperation.GreaterThan:
-                expression = Expression.GreaterThan(property, value);
-                break;
-            case ComparisonOperation.GreaterThanOrEqual:
-                expression = Expression.GreaterThanOrEqual(property, value);
-                break;
-            case ComparisonOperation.Inequality:
-                expression = Expression.NotEqual(property, value);
-                break;
-            case ComparisonOperation.LessThan:
-                expression = Expression.LessThan(property, value);
-                break;
-            case ComparisonOperation.LessThanOrEqual:
-                expression = Expression.LessThanOrEqual(property, value);
-                break;
-            default:
-                throw new NotImplementedException($"Operation {operation} is not supported");
+            throw new ArgumentException($"Property '{propertyName}' is not compatible with type {typeof(TProperty).Name}");
         }
 
-        var lambda = Expression.Lambda<Func<TModel, bool>>(expression, parameterExpression);
+        // Convert both sides to the same non-nullable type
+        Expression left = property;
+        Expression right = value;
+        if (property.Type != typeof(TProperty))
+        {
+            left = Expression.Convert(property, propertyType);
+            right = Expression.Convert(value, propertyType);
+        }
         
-        return lambda;
-    }
-
-    internal static Expression<Func<TModel, bool>> GetDateNullableExpression(string propertyName, DateTime? filterValue, ComparisonOperation operation)
-    {
-        var parameterExpression = Expression.Parameter(typeof(TModel));
-        var property = Expression.Property(parameterExpression, propertyName);
-        var value = Expression.Constant(filterValue, typeof(DateTime?));
-
-        BinaryExpression expression;
-
-        switch (operation)
+        BinaryExpression comparison = operation switch
         {
-            case ComparisonOperation.Equality:
-                expression = Expression.Equal(property, value);
-                break;
-            case ComparisonOperation.GreaterThan:
-                expression = Expression.GreaterThan(property, value);
-                break;
-            case ComparisonOperation.GreaterThanOrEqual:
-                expression = Expression.GreaterThanOrEqual(property, value);
-                break;
-            case ComparisonOperation.Inequality:
-                expression = Expression.NotEqual(property, value);
-                break;
-            case ComparisonOperation.LessThan:
-                expression = Expression.LessThan(property, value);
-                break;
-            case ComparisonOperation.LessThanOrEqual:
-                expression = Expression.LessThanOrEqual(property, value);
-                break;
-            default:
-                throw new NotImplementedException($"Operation {operation} is not supported");
-        }
+            ComparisonOperation.Equality => Expression.Equal(left, right),
+            ComparisonOperation.Inequality => Expression.NotEqual(left, right),
+            ComparisonOperation.GreaterThan => Expression.GreaterThan(left, right),
+            ComparisonOperation.GreaterThanOrEqual => Expression.GreaterThanOrEqual(left, right),
+            ComparisonOperation.LessThan => Expression.LessThan(left, right),
+            ComparisonOperation.LessThanOrEqual => Expression.LessThanOrEqual(left, right),
+            _ => throw new NotImplementedException($"Operation {operation} is not supported")
+        };
 
-        var lambda = Expression.Lambda<Func<TModel, bool>>(expression, parameterExpression);
-
-        return lambda;
+        return Expression.Lambda<Func<TModel, bool>>(comparison, parameter);
     }
 }

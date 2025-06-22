@@ -9,7 +9,7 @@ A powerful and extensible filtering framework for C# applications. `GenericFilte
 ## 📦 Features
 
 - ✅ Attribute-based filtering with `FilterMemberAttribute`
-- 🔄 Supports string, list, and `DateTime` comparisons
+- 🔄 Supports string, list, `DateTime` and numeric comparisons
 - 🧠 Logical operations (`AND` / `OR`) between filters
 - 🧰 Customizable filter behavior with `FilterOptions`
 - 🧪 Built-in validation and error handling
@@ -33,7 +33,7 @@ Decorates filter properties to define:
 - Target model property (`Name`)
 - String comparison method (`Equals`, `Contains`)
 - Case sensitivity
-- Date comparison operations
+- Dates and numbers comparison operations
 - Logical grouping (`And`, `Or`)
 - Inclusion/exclusion in query generation
 
@@ -46,32 +46,64 @@ Controls runtime behavior:
 
 ## 🚀 Getting Started
 
+### 1. Define a Model
+
+```csharp
+public record Product(string Name, List<string> Tags, 
+    double UnitPrice, DateTime? CreatedAt);
+```
+
 ### 1. Define a Filter
 
 ```csharp
 public class ProductFilter : Filter<Product>
 {
-    [FilterMember("Name", StringComparisonMethod.Contains, stringComparisonIgnoreCase: true)]
-    public string Name { get; set; }
+    [FilterMember]
+    public string Name { get; init; }
 
-    [FilterMember("Tags", StringComparisonMethod.Equals)]
-    public List<string> Tags { get; set; }
+    [FilterMember(stringComparisonMethod: StringComparisonMethod.Contains, stringComparisonIgnoreCase: true)]
+    public List<string> Tags { get; init; }
+    
+    [FilterMember("UnitPrice", comparisonOperation: ComparisonOperation.GreaterThanOrEqual)]
+    public double? PriceFrom { get; init; }
+    
+    [FilterMember("UnitPrice", comparisonOperation: ComparisonOperation.LessThan)]
+    public double? PriceTo { get; init; }
 
     [FilterMember("CreatedAt", comparisonOperation: ComparisonOperation.GreaterThanOrEqual)]
-    public DateTime? CreatedAfter { get; set; }
+    public DateTime? StartDate { get; init; }
+
+    [FilterMember("CreatedAt", comparisonOperation: ComparisonOperation.LessThanOrEqual)]
+    public DateTime? EndDate { get; init; }
 }
 ```
 
 ### 2. Apply the Filter
 
 ```csharp
-var filter = new ProductFilter { Name = "book", Tags = new List<string> { "education" } };
+var products = new List<Product>
+{
+    new Product("book", [ "education", "programming", "software" ], 
+        58.90, new DateTime(2025, 2, 12)),
+    new Product("phone", [ "android", "electronics" ],
+        770.00, new DateTime(2023, 6, 8)),
+    new Product("laptop", [ "linux", "electronics", "entertaiment" ], 
+        3999.99, new DateTime(2024, 7, 22)),
+};
+
+var filter = new ProductFilter
+{
+    Name = "book", 
+    Tags = [ "education", "programing1" ], 
+    PriceFrom = 40.00,
+    PriceTo = 100.00,
+    StartDate = new DateTime(2025, 2, 1), 
+    EndDate = new DateTime(2025, 3, 1)
+};
 var expression = filter.GetQueryExpression();
 
-var filteredProducts = dbContext.Products.AsExpandable().Where(expression).ToList();
+var filteredProducts = products.AsQueryable().Where(expression).ToList();
 ```
-
-> Requires LinqKit for `AsExpandable()` support.
 
 ---
 
@@ -90,7 +122,8 @@ This allows filters to skip missing model properties without throwing exceptions
 
 ## 🧪 Validation & Safety
 
-- Only supports `string`, `List<string>`, and `DateTime?` filter types
+- Only supports `string`, `List<string>`, `DateTime?`, `double?` and `int?` filter types
+- No nested properties supported
 - Throws `FilterException` for unsupported types or misconfigurations
 - Ensures at least one valid filter is defined
 

@@ -129,7 +129,7 @@ public class FilterExpressions_Test
     
     #endregion
     
-    #region DateTime expressions methods tests
+    #region Comparison expressions methods tests
 
     [Theory]
     [InlineData("2024-01-01", "2024-01-01", ComparisonOperation.Equality, true)]
@@ -140,7 +140,7 @@ public class FilterExpressions_Test
     [InlineData("2024-01-01", "2024-01-02", ComparisonOperation.LessThanOrEqual, true)]
     [InlineData("2024-01-01", "2024-01-01", ComparisonOperation.LessThanOrEqual, true)]
     [InlineData("2024-01-01", "2024-01-01", ComparisonOperation.Inequality, false)]
-    public void GetDateExpression_Test(
+    public void GetComparisonExpression_DateTime_Test(
         string modelDateStr,
         string filterDateStr,
         ComparisonOperation operation,
@@ -149,7 +149,7 @@ public class FilterExpressions_Test
         var model = new TestModelWithDate { Date = DateTime.Parse(modelDateStr) };
         var filterDate = DateTime.Parse(filterDateStr);
 
-        var expression = FilterExpressions<TestModelWithDate>.GetDateExpression("Date", filterDate, operation);
+        var expression = FilterExpressions<TestModelWithDate>.GetComparisonExpression("Date", filterDate, operation);
         var func = expression.Compile();
 
         var result = func(model);
@@ -166,7 +166,7 @@ public class FilterExpressions_Test
     [InlineData("2024-01-01", "2024-01-02", ComparisonOperation.LessThanOrEqual, true)]
     [InlineData("2024-01-01", "2024-01-01", ComparisonOperation.LessThanOrEqual, true)]
     [InlineData("2024-01-01", "2024-01-01", ComparisonOperation.Inequality, false)]
-    public void GetDateNullableExpression_Test(
+    public void GetComparisonExpression_DateTime_Nullable_Test(
         string modelDateStr,
         string filterDateStr,
         ComparisonOperation operation,
@@ -175,7 +175,7 @@ public class FilterExpressions_Test
         var model = new TestModelWithDate { NullableDate = DateTime.Parse(modelDateStr) };
         var filterDate = DateTime.Parse(filterDateStr);
 
-        var expression = FilterExpressions<TestModelWithDate>.GetDateNullableExpression("NullableDate", filterDate, operation);
+        var expression = FilterExpressions<TestModelWithDate>.GetComparisonExpression("NullableDate", filterDate, operation);
         var func = expression.Compile();
 
         var result = func(model);
@@ -183,6 +183,106 @@ public class FilterExpressions_Test
         Assert.Equal(expectedResult, result);
     }
     
+    [Theory]
+    [InlineData(7.7, 7.7, ComparisonOperation.Equality, true)]
+    [InlineData(7.8, 7.7, ComparisonOperation.GreaterThan, true)]
+    [InlineData(7.8, 7.7, ComparisonOperation.GreaterThanOrEqual, true)]
+    [InlineData(7.7, 7.7, ComparisonOperation.GreaterThanOrEqual, true)]
+    [InlineData(7.6, 7.7, ComparisonOperation.LessThan, true)]
+    [InlineData(7.6, 7.7, ComparisonOperation.LessThanOrEqual, true)]
+    [InlineData(7.7, 7.7, ComparisonOperation.LessThanOrEqual, true)]
+    [InlineData(7.7, 7.7, ComparisonOperation.Inequality, false)]
+    public void GetComparisonExpression_Double_Test(
+        double modelValue,
+        double filterValue,
+        ComparisonOperation operation,
+        bool expectedResult)
+    {
+        var model = new TestModelWithDoubleNumber { Number = modelValue };
+        
+        var expression = FilterExpressions<TestModelWithDoubleNumber>.GetComparisonExpression("Number", filterValue, operation);
+        var func = expression.Compile();
+
+        var result = func(model);
+
+        Assert.Equal(expectedResult, result);
+    }
+    
+    [Theory]
+    [InlineData(7.7, 7.7, ComparisonOperation.Equality, true)]
+    [InlineData(7.8, 7.7, ComparisonOperation.GreaterThan, true)]
+    [InlineData(7.8, 7.7, ComparisonOperation.GreaterThanOrEqual, true)]
+    [InlineData(7.7, 7.7, ComparisonOperation.GreaterThanOrEqual, true)]
+    [InlineData(7.6, 7.7, ComparisonOperation.LessThan, true)]
+    [InlineData(7.6, 7.7, ComparisonOperation.LessThanOrEqual, true)]
+    [InlineData(7.7, 7.7, ComparisonOperation.LessThanOrEqual, true)]
+    [InlineData(7.7, 7.7, ComparisonOperation.Inequality, false)]
+    public void GetComparisonExpression_Double_Nullable_Test(
+        double? modelValue,
+        double? filterValue,
+        ComparisonOperation operation,
+        bool expectedResult)
+    {
+        var model = new TestModelWithDoubleNumber { NullableNumber = modelValue };
+
+        var expression = FilterExpressions<TestModelWithDoubleNumber>.GetComparisonExpression("NullableNumber", filterValue, operation);
+        var func = expression.Compile();
+
+        var result = func(model);
+
+        Assert.Equal(expectedResult, result);
+    }
+
+    [Theory]
+    [InlineData(7, 7, ComparisonOperation.Equality, true)]
+    [InlineData(8, 7, ComparisonOperation.GreaterThan, true)]
+    [InlineData(8, 7, ComparisonOperation.GreaterThanOrEqual, true)]
+    [InlineData(7, 7, ComparisonOperation.GreaterThanOrEqual, true)]
+    [InlineData(6, 7, ComparisonOperation.LessThan, true)]
+    [InlineData(6, 7, ComparisonOperation.LessThanOrEqual, true)]
+    [InlineData(7, 7, ComparisonOperation.LessThanOrEqual, true)]
+    [InlineData(7, 7, ComparisonOperation.Inequality, false)]
+    public void GetComparisonExpression_Integer_Test(
+        int modelValue,
+        int filterValue,
+        ComparisonOperation operation,
+        bool expectedResult)
+    {
+        var model = new TestModelWithIntegerNumber { Number = modelValue };
+        
+        var expression = FilterExpressions<TestModelWithIntegerNumber>.GetComparisonExpression("Number", filterValue, operation);
+        var func = expression.Compile();
+
+        var result = func(model);
+
+        Assert.Equal(expectedResult, result);
+    }
+    
+    [Theory]
+    [InlineData(7, 7, ComparisonOperation.Equality, true)] 
+    [InlineData(8, 7, ComparisonOperation.GreaterThan, true)]
+    [InlineData(8, 7, ComparisonOperation.GreaterThanOrEqual, true)]
+    [InlineData(7, 7, ComparisonOperation.GreaterThanOrEqual, true)]
+    [InlineData(6, 7, ComparisonOperation.LessThan, true)]
+    [InlineData(6, 7, ComparisonOperation.LessThanOrEqual, true)]
+    [InlineData(7, 7, ComparisonOperation.LessThanOrEqual, true)]
+    [InlineData(7, 7, ComparisonOperation.Inequality, false)]
+    public void GetComparisonExpression_Integer_Nullable_Test(
+        int? modelValue,
+        int? filterValue,
+        ComparisonOperation operation,
+        bool expectedResult)
+    {
+        var model = new TestModelWithIntegerNumber { NullableNumber = modelValue };
+
+        var expression = FilterExpressions<TestModelWithIntegerNumber>.GetComparisonExpression("NullableNumber", filterValue, operation);
+        var func = expression.Compile();
+
+        var result = func(model);
+
+        Assert.Equal(expectedResult, result);
+    }
+
     #endregion
     
     #region Test models
@@ -201,6 +301,18 @@ public class FilterExpressions_Test
     {
         public DateTime Date { get; init; }
         public DateTime? NullableDate { get; init; }
+    }
+
+    private class TestModelWithDoubleNumber
+    {
+        public double Number { get; init; }
+        public double? NullableNumber { get; init; }
+    }
+
+    private class TestModelWithIntegerNumber
+    {
+        public int Number { get; init; }
+        public int? NullableNumber { get; init; }
     }
 
     #endregion
