@@ -3,14 +3,14 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latestmajor</LangVersion>
-    <Version>1.0.0-alpha.1</Version>
+    <Version>1.0.0-alpha.2</Version>
     <Authors>alevdikov</Authors>
     <PackageProjectUrl>https://github.com/alevdikov/GenericFilters</PackageProjectUrl>
     <PackageLicense>http://www.apache.org/licenses/LICENSE-2.0</PackageLicense>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Description>GenericFilters is a simple library provides a generic Filter class, that allows to 
-configure filters based on you model, and generate a Linq query expression automatically</Description>
+configure filters based on you model, and generate a Linq query expression dynamically</Description>
     <Nullable>disable</Nullable>
   </PropertyGroup>
 
