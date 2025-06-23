@@ -15,7 +15,7 @@ public abstract class Filter<TModel> where TModel : class
     {
         var isValid = false;
 
-        var isAllowedTypes = (Type type) =>
+        var allowedTypes = (Type type) =>
             type == typeof(string) ||
             type == typeof(List<string>) ||
             type == typeof(DateTime) || type == typeof(DateTime?) ||
@@ -28,7 +28,7 @@ public abstract class Filter<TModel> where TModel : class
             if (hasFilterAttribute)
             {
                 isValid = true;
-                if (!isAllowedTypes(property.PropertyType))
+                if (!allowedTypes(property.PropertyType))
                     throw new FilterException($"{property.Name} - Filter member with type {property.PropertyType} is not supported.");
             }
         }
@@ -142,7 +142,23 @@ public abstract class Filter<TModel> where TModel : class
         return true;
     }
 
-    public virtual Expression<Func<TModel, bool>> GetQueryExpression(FilterOptions filterOptions = null)
+    protected virtual Expression<Func<TModel, bool>> GetQueryExpressionImpl(FilterOptions filterOptions)
+    {
+        return null;
+    }
+    
+    public Expression<Func<TModel, bool>> GetQueryExpression(FilterOptions filterOptions = null)
+    {
+        var predicate = PredicateBuilder.New(GetQueryExpressionInt(filterOptions));
+        // Get custom expression if provide in overrides 
+        var expression = GetQueryExpressionImpl(filterOptions);
+        if(expression != null)
+            predicate.And(expression);
+
+        return predicate;
+    }
+    
+    private Expression<Func<TModel, bool>> GetQueryExpressionInt(FilterOptions filterOptions)
     {
         var predicate = PredicateBuilder.New<TModel>();
         
