@@ -18,8 +18,8 @@ public class FilterTest
             Name = "Test 1",
             Prop = "Prop 1",
             Date = date,
-            Items1 = new List<string> { "1", "2", "3" },
-            Items2 = new List<string> { "4", "5", "6" },
+            Items1 = [ "1", "2", "3" ],
+            Items2 = [ "4", "5", "6" ],
             Optional = "Optional 1"
         };
 
@@ -29,8 +29,8 @@ public class FilterTest
             Name = "Test 1",
             Prop = "Prop 1",
             Date = date,
-            Items1 = new List<string> { "1", "2", "3" },
-            Items2 = new List<string> { "4", "5", "6" },
+            Items1 = [ "1", "2", "3" ],
+            Items2 = [ "4", "5", "6" ],
             Optional = "Optional 2"
         };
 
@@ -40,8 +40,8 @@ public class FilterTest
             Name = "Test 1",
             Prop = "Prop 1",
             Date = date,
-            Items1 = new List<string> { "3", "2", "1" },
-            Items2 = new List<string> { "6", "5", "4" },
+            Items1 = [ "3", "2", "1" ],
+            Items2 = [ "6", "5", "4" ],
             Optional = "Optional 1"
         };
 
@@ -69,8 +69,8 @@ public class FilterTest
             Name = "Test 1",
             Prop = "Prop 1",
             Date = date1,
-            Items1 = new List<string> { "1", "2", "3" },
-            Items2 = new List<string> { "4", "5", "6" },
+            Items1 = [ "1", "2", "3" ],
+            Items2 = [ "4", "5", "6" ],
             Optional = "Optional 1"
         };
 
@@ -80,8 +80,8 @@ public class FilterTest
             Name = "Test 1",
             Prop = "Prop 1",
             Date = date1,
-            Items1 = new List<string> { "1", "2", "3" },
-            Items2 = new List<string> { "4", "5", "6" },
+            Items1 = [ "1", "2", "3" ],
+            Items2 = [ "4", "5", "6" ],
             Optional = "Optional 2"
         };
 
@@ -91,8 +91,8 @@ public class FilterTest
             Name = "Test 1",
             Prop = "Prop 1",
             Date = date1,
-            Items1 = new List<string> { "1", "2", "3" },
-            Items2 = new List<string> { "4", "5", "7" },
+            Items1 = [ "1", "2", "3" ],
+            Items2 = [ "4", "5", "7" ],
             Optional = "Optional 1"
         };
 
@@ -102,8 +102,8 @@ public class FilterTest
             Name = "Test 1",
             Prop = "Prop 1",
             Date = date2,
-            Items1 = new List<string> { "1", "2", "3" },
-            Items2 = new List<string> { "4", "5", "6" },
+            Items1 = [ "1", "2", "3" ],
+            Items2 = [ "4", "5", "6" ],
             Optional = "Optional 1"
         };
 
@@ -151,8 +151,8 @@ public class FilterTest
             Name = "Test 1",
             Prop = "Prop 1",
             Date = DateTime.Now,
-            Items1 = new List<string> { "1", "2", "3" },
-            Items2 = new List<string> { "4", "5", "6" },
+            Items1 = [ "1", "2", "3" ],
+            Items2 = [ "4", "5", "6" ],
         };
 
         var filter2 = new TestFilter1
@@ -160,8 +160,8 @@ public class FilterTest
             Id = "1",
             Name = "Test 1",
             Prop = "Prop 1",
-            Items1 = new List<string> { "1", "2", "3" },
-            Items2 = new List<string> { "4", "5", "6" },
+            Items1 = [ "1", "2", "3" ],
+            Items2 = [ "4", "5", "6" ],
         };
 
         var filter3 = new TestFilter1
@@ -189,26 +189,26 @@ public class FilterTest
             Id = "1",
             Name = "Test 1",
             Prop = "",
-            Items1 = new List<string> { "One", "Two" }
+            Items1 = [ "One", "Two" ]
         };
 
         var models = new List<TestModel1>
         {
-            new TestModel1
+            new()
             {
                 Id = "1",
                 Name = "Test 1",
                 Prop = "Prop 1",
                 Item1 = "One",
             },
-            new TestModel1
+            new()
             {
                 Id = "2",
                 Name = "Test 2",
                 Prop = "Prop 2",
                 Item1 = "Two",
             },
-            new TestModel1
+            new()
             {
                 Id = "3",
                 Name = "Test 3",
@@ -225,7 +225,7 @@ public class FilterTest
 
         Assert.Null(result);
     }
-
+    
     [Fact]
     public void GetQueryExpression_ListEmpty_Test()
     {
@@ -236,26 +236,26 @@ public class FilterTest
             Id = "1",
             Name = "Test 1",
             Prop = "Prop 1",
-            Items1 = new List<string>(),
+            Items1 = [],
         };
 
         var models = new List<TestModel1>
         {
-            new TestModel1
+            new()
             {
                 Id = "1",
                 Name = "Test 1",
                 Prop = "Prop 1",
                 Item1 = "One",
             },
-            new TestModel1
+            new()
             {
                 Id = "2",
                 Name = "Test 2",
                 Prop = "Prop 2",
                 Item1 = "Two",
             },
-            new TestModel1
+            new()
             {
                 Id = "3",
                 Name = "Test 3",
@@ -272,7 +272,7 @@ public class FilterTest
 
         Assert.Null(result);
     }
-
+    
     [Fact]
     public void GetQueryExpression_Missing_Fail_Test()
     {
@@ -281,34 +281,26 @@ public class FilterTest
         var filter = new TestFilter2
         {
             Id = "1",
-            Name = "Test 1",
-            Prop = "Prop 1",
-            Items1 = new List<string> { "1", "2" },
-            Items2 = new List<string> { "4", "5" },
+            Items1 = [ "1", "2" ],
+            Items2 = [ "3", "4" ]
         };
 
         var models = new List<TestModel2>
         {
-            new TestModel2
+            new ()
             {
                 Id = "1",
-                Name = "Test 1",
-                Prop = "Prop 1",
-                Items1 = new List<string> { "1", "2", "3" },
-            },
-            new TestModel2
+                Items1 = [ "1" ],
+           },
+            new ()
             {
                 Id = "2",
-                Name = "Test 2",
-                Prop = "Prop 2",
-                Items1 = new List<string> { "7", "8", "9" },
+                Items1 = [ "2" ]
             },
-            new TestModel2
+            new () 
             {
                 Id = "3",
-                Name = "Test 3",
-                Prop = "Prop 3",
-                Items1 = new List<string> { "13", "14", "15" },
+                Items1 = [ "3" ]
             }
         };
 
@@ -325,34 +317,25 @@ public class FilterTest
         var filter = new TestFilter2
         {
             Id = "1",
-            Name = "Test 1",
-            Prop = "Prop 1",
-            Items1 = new List<string> { "1", "2" },
-            Items2 = new List<string> { "4", "5" },
+            Items1 = [ "1", "2" ]
         };
 
         var models = new List<TestModel2>
         {
-            new TestModel2
+            new ()
             {
                 Id = "1",
-                Name = "Test 1",
-                Prop = "Prop 1",
-                Items1 = new List<string> { "1", "2", "3" },
+                Items1 = [ "1" ]
             },
-            new TestModel2
+            new ()
             {
                 Id = "2",
-                Name = "Test 2",
-                Prop = "Prop 2",
-                Items1 = new List<string> { "7", "8", "9" },
+                Items1 = [ "2" ]
             },
-            new TestModel2
+            new ()
             {
                 Id = "3",
-                Name = "Test 3",
-                Prop = "Prop 3",
-                Items1 = new List<string> { "13", "14", "15" },
+                Items1 = [ "3" ]
             }
         };
 
@@ -361,6 +344,8 @@ public class FilterTest
         var expected = models.First(i => i.Id == "1");
         var expression = filter.GetQueryExpression(new FilterOptions { Optimistic = true });
         var result = models.AsQueryable().FirstOrDefault(expression);
+        
+        Assert.Equal(expected, result);
     }
     
     [Fact]
@@ -628,18 +613,10 @@ public class TestFilter2 : Filter<TestModel2>
     public string Id { get; set; }
 
     [FilterMember]
-    public string Name { get; set; }
-
-    [FilterMember]
-    public string Prop { get; set; }
-
-    [FilterMember]
     public List<string> Items1 { get; set; }
-
+    
     [FilterMember]
     public List<string> Items2 { get; set; }
-
-    public string Optional { get; set; }
 }
 
 public class TestFilterEmpty : Filter<TestModel1>
@@ -731,8 +708,6 @@ public class TestModel1
 public class TestModel2
 {
     public string Id { get; set; }
-    public string Name { get; set; }
-    public string Prop { get; set; }
     public List<string> Items1 { get; set; }
 }
 

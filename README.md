@@ -53,9 +53,11 @@ public record Product(string Name, List<string> Tags,
     double UnitPrice, DateTime? CreatedAt);
 ```
 
-### 1. Define a Filter
+### 2. Define a Filter
 
 ```csharp
+using GenericFilters;
+
 public class ProductFilter : Filter<Product>
 {
     [FilterMember]
@@ -78,9 +80,11 @@ public class ProductFilter : Filter<Product>
 }
 ```
 
-### 2. Apply the Filter
+### 3. Apply the Filter
 
 ```csharp
+using GenericFilters.Extensions;
+
 var products = new List<Product>
 {
     new Product("book", [ "education", "programming", "software" ], 
@@ -102,10 +106,17 @@ var filter = new ProductFilter
 };
 var expression = filter.GetQueryExpression();
 
-var filteredProducts = products.AsQueryable().Where(expression).ToList();
+var filteredProducts = products.FilterBy(filter).ToList();
 ```
 
----
+### 3.1. Same scenario using GetQueryExpression() method
+
+```csharp
+var filteredProducts = products.AsQueryable()
+    .Where(expression)
+    .Take(filter.StartIndex).Skip(filter.PageSize)
+    .ToList();
+```
 
 ## ⚙️ Advanced Options
 
