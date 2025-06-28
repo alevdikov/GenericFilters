@@ -104,7 +104,6 @@ var filter = new ProductFilter
     StartDate = new DateTime(2025, 2, 1), 
     EndDate = new DateTime(2025, 3, 1)
 };
-var expression = filter.GetQueryExpression();
 
 var filteredProducts = products.FilterBy(filter).ToList();
 ```
@@ -112,6 +111,8 @@ var filteredProducts = products.FilterBy(filter).ToList();
 ### 3.1. Same scenario using GetQueryExpression() method
 
 ```csharp
+var expression = filter.GetQueryExpression();
+
 var filteredProducts = products.AsQueryable()
     .Where(expression)
     .Take(filter.StartIndex).Skip(filter.PageSize)
