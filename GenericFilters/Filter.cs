@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -142,7 +143,7 @@ public abstract class Filter<TModel> where TModel : class
         return true;
     }
 
-    protected virtual Expression<Func<TModel, bool>> GetQueryExpressionImpl(FilterOptions filterOptions)
+    protected virtual Expression<Func<TModel, bool>> GetQueryExpressionExt(FilterOptions filterOptions)
     {
         return null;
     }
@@ -151,7 +152,7 @@ public abstract class Filter<TModel> where TModel : class
     {
         var predicate = PredicateBuilder.New(GetQueryExpressionInt(filterOptions));
         // Get custom expression if provide in overrides 
-        var expression = GetQueryExpressionImpl(filterOptions);
+        var expression = GetQueryExpressionExt(filterOptions);
         if(expression != null)
             predicate.And(expression);
 
@@ -161,7 +162,6 @@ public abstract class Filter<TModel> where TModel : class
     private Expression<Func<TModel, bool>> GetQueryExpressionInt(FilterOptions filterOptions)
     {
         var predicate = PredicateBuilder.New<TModel>();
-        
         foreach (var filterProperty in GetType().GetProperties())
         {
             var attribute = filterProperty.GetCustomAttribute(typeof(FilterMemberAttribute)) as FilterMemberAttribute;
