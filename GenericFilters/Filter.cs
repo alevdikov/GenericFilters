@@ -241,6 +241,12 @@ public abstract class Filter<TModel> where TModel : class
                         predicate.And(expression);
                     }
                 }
+                else if (filterProperty.PropertyType == typeof(DateTime))
+                {
+                    var value = (DateTime)filterProperty.GetValue(this); 
+                    var expression = FilterExpressions<TModel>.GetComparisonExpression(propertyName, value, attribute.ComparisonOperation);
+                    predicate.And(expression);
+                }
                 else if (filterProperty.PropertyType == typeof(double?))
                 {
                     var number = filterProperty.GetValue(this) as double?;
@@ -251,6 +257,12 @@ public abstract class Filter<TModel> where TModel : class
                         predicate.And(expression);
                     }
                 }
+                else if (filterProperty.PropertyType == typeof(double))
+                {
+                    var value = (double)filterProperty.GetValue(this); 
+                    var expression = FilterExpressions<TModel>.GetComparisonExpression(propertyName, value, attribute.ComparisonOperation);
+                    predicate.And(expression);
+                }
                 else if (filterProperty.PropertyType == typeof(int?)) 
                 {
                     var number = filterProperty.GetValue(this) as int?;
@@ -260,6 +272,12 @@ public abstract class Filter<TModel> where TModel : class
                         var expression = FilterExpressions<TModel>.GetComparisonExpression(propertyName, value, attribute.ComparisonOperation);
                         predicate.And(expression);
                     }
+                }
+                else if (filterProperty.PropertyType == typeof(int)) 
+                {
+                    var value = (int)filterProperty.GetValue(this);
+                    var expression = FilterExpressions<TModel>.GetComparisonExpression(propertyName, value, attribute.ComparisonOperation);
+                    predicate.And(expression);
                 }
                 else
                 {
