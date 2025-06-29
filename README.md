@@ -115,7 +115,6 @@ var expression = filter.GetQueryExpression();
 
 var filteredProducts = products.AsQueryable()
     .Where(expression)
-    .Take(filter.StartIndex).Skip(filter.PageSize)
     .ToList();
 ```
 
