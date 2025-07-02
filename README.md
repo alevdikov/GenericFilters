@@ -1,8 +1,21 @@
 ---
 
-# 🔍 GenericFilters
+# 🔍 GenericFilters [![NuGet](https://img.shields.io/nuget/v/genericFilters.svg)](https://www.nuget.org/packages/genericFilters/)
 
 A powerful and extensible filtering framework for C# applications. `GenericFilters` enables dynamic, attribute-driven filtering logic for LINQ queries, in-memory collections, and Cosmos DB SDK queries.
+
+---
+
+## 🔧 Installation
+
+### .NET CLI
+```bash
+dotnet add package GenericFilters
+```
+
+### Package Manager
+
+Install-Package GenericFilters
 
 ---
 
@@ -19,7 +32,7 @@ A powerful and extensible filtering framework for C# applications. `GenericFilte
 
 ## 📁 Components
 
-### 1. `Filter<TModel>`
+### 1. `Filter`
 
 An abstract base class that:
 - Validates filter properties at runtime
@@ -118,6 +131,12 @@ var filteredProducts = products.AsQueryable()
     .ToList();
 ```
 
+▶️ [Run this code on .NET Fiddle][dotnet]
+
+[dotnet]: https://dotnetfiddle.net/id3pVo
+
+---
+
 ## ⚙️ Advanced Options
 
 ### Optimistic Filtering
@@ -133,7 +152,7 @@ This allows filters to skip missing model properties without throwing exceptions
 
 ## 🧪 Validation & Safety
 
-- Only supports `string`, `List<string>`, `DateTime?`, `double?` and `int?` filter types
+- Only supports `string`, `List<string>`, `DateTime`, `double` and `int` filter types, with nullables
 - No nested properties supported
 - Throws `FilterException` for unsupported types or misconfigurations
 - Ensures at least one valid filter is defined
