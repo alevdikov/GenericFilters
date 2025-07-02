@@ -1,16 +1,10 @@
 ---
 
-# 🔍 GenericFilters
+# 🔍 GenericFilters [![NuGet](https://img.shields.io/nuget/v/genericFilters.svg)](https://www.nuget.org/packages/genericFilters/)
 
 A powerful and extensible filtering framework for C# applications. `GenericFilters` enables dynamic, attribute-driven filtering logic for LINQ queries, in-memory collections, and Cosmos DB SDK queries.
 
 ---
-
-# GenericFilters [![NuGet](https://img.shields.io/nuget/v/genericFilters.svg)](https://www.nuget.org/packages/genericFilters/)
-
-A lightweight C# library that helps you build dynamic LINQ filter expressions based on your model classes. 
-It supports common filtering scenarios out of the box and integrates seamlessly with ORMs like Entity Framework, CosmosDB SDK, and Dapper. 
-You can extend its behavior using attributes or by overriding the Filter class for more complex logic.
 
 ## 🔧 Installation
 
