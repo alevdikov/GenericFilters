@@ -17,6 +17,8 @@ dotnet add package GenericFilters
 
 Install-Package GenericFilters
 
+---
+
 ## 📦 Features
 
 - ✅ Attribute-based filtering with `FilterMemberAttribute`
@@ -132,6 +134,8 @@ var filteredProducts = products.AsQueryable()
 ▶️ [Run this code on .NET Fiddle][dotnet]
 
 [dotnet]: https://dotnetfiddle.net/id3pVo
+
+---
 
 ## ⚙️ Advanced Options
 
