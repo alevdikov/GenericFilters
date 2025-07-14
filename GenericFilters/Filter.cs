@@ -83,7 +83,7 @@ public abstract class Filter<TModel> where TModel : class
         return hashCode;
     }
 
-    internal virtual bool Any()
+    public virtual bool Any()
     {
         foreach (var property in GetType().GetProperties())
         {
@@ -113,7 +113,7 @@ public abstract class Filter<TModel> where TModel : class
         return false;
     }
 
-    internal virtual bool All()
+    public virtual bool All()
     {
         foreach (var property in GetType().GetProperties())
         {
