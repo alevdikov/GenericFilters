@@ -148,6 +148,54 @@ var expression = filter.GetQueryExpression(options);
 
 This allows filters to skip missing model properties without throwing exceptions.
 
+### IgnoreInQueryExpression
+
+When IgnoreInQueryExpression is set to `true` in the FilterMember attribute, that property is skipped when we build 
+Filter expression   
+
+```csharp
+[FilterMember(ignoreInQueryExpression: true)]
+public List<string> Items { get; init; }
+```
+You can use that parameter in cases when you need to implement any custom filtering logic.
+More details about custom filtering is provided under section related to GetQueryExpressionExt method
+
+It is the same when we don't provide any attribute for that property at all, but the difference is,
+If we provide FilterMember, that property will be taken into consideration when we call 
+getHashCode(), Any() or All() methods of the Filter class. 
+
+### GetQueryExpressionExt method
+
+In some cases in our model or our filter we may have some complex properties not handled by the Filter 
+out of the box.  
+Or probably we need to provide some specific logic with extra conditions. 
+
+In that case we can apply the following approach:
+- Apply FilterMember attributes for all strings, numeric etc. properties as usually. 
+- Mark all properties with custom logic we are going to provide as IgnoreInQueryExpression
+- Override GetQueryExpressionExt and add all custom logic using LinqKit or build Linq Expression in any another way.
+
+When we call either GetQueryExpression or FilterBy, that custom Linq Expression will be added to the end of 
+Expression generated for our 'standard' filter behind the scene.
+
+### Pagination support
+
+There are 2 properties provided in the Filter class in order to support pagination 
+
+```csharp
+public int StartIndex { get; set; } = -1;
+public int PageSize { get; set; } = -1;
+```
+Those properties can be set in the Filter and tracked e.g. on UI side. 
+When we call FilterBy, internally it will be added Skip() and Take() to our expression. 
+If we are using GetQueryExpression, we need to build that logic by ourselves
+
+```csharp
+var filteredProducts = products.AsQueryable()
+    .Where(filter.GetQueryExpression())
+    .Take(filter.StartIndex).Skip(filter.PageSize);
+```
+
 ---
 
 ## 🧪 Validation & Safety
