@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -16,20 +15,13 @@ public abstract class Filter<TModel> where TModel : class
     {
         var isValid = false;
 
-        var allowedTypes = (Type type) =>
-            type == typeof(string) ||
-            type == typeof(List<string>) ||
-            type == typeof(DateTime) || type == typeof(DateTime?) ||
-            type == typeof(double) || type == typeof(double?) ||
-            type == typeof(int) || type == typeof(int?);
-        
         foreach (var property in GetType().GetProperties())
         {
             var hasFilterAttribute = Attribute.IsDefined(property, typeof(FilterMemberAttribute));
             if (hasFilterAttribute)
             {
                 isValid = true;
-                if (!allowedTypes(property.PropertyType))
+                if (!IsAllowedType(property.PropertyType))
                     throw new FilterException($"{property.Name} - Filter member with type {property.PropertyType} is not supported.");
             }
         }
@@ -47,12 +39,7 @@ public abstract class Filter<TModel> where TModel : class
             var hasFilterAttribute = Attribute.IsDefined(property, typeof(FilterMemberAttribute));
             if (hasFilterAttribute)
             {
-                if (property.PropertyType == typeof(string))
-                {
-                    if (property.GetValue(this) != null)
-                        hashCode ^= property.GetValue(this).ToString().GetHashCode();
-                }
-                else if (property.PropertyType == typeof(List<string>))
+                if (property.PropertyType == typeof(List<string>))
                 {
                     var list = property.GetValue(this) as List<string>;
                     if (list != null && list.Any())
@@ -63,9 +50,14 @@ public abstract class Filter<TModel> where TModel : class
                     if (property.GetValue(this) != null)
                         hashCode ^= property.GetValue(this).GetHashCode();
                 }
+                else if (IsAllowedType(property.PropertyType))
+                {
+                    if (property.GetValue(this) != null)
+                        hashCode ^= property.GetValue(this).ToString().GetHashCode();
+                }
                 else
                 {
-                    string error = $"Filter member with type {property.PropertyType} is not supported." +
+                    var error = $"Filter member with type {property.PropertyType} is not supported." +
                         " You need to provide custom implementation for GetHashCode() method";
                     throw new FilterException(error);
                 }
@@ -90,23 +82,14 @@ public abstract class Filter<TModel> where TModel : class
             var hasFilterAttribute = Attribute.IsDefined(property, typeof(FilterMemberAttribute));
             if (hasFilterAttribute)
             {
-                if (property.PropertyType == typeof(string))
-                {
-                    if (!string.IsNullOrEmpty(property.GetValue(this) as string))
-                        return true;
-                }
                 if (property.PropertyType == typeof(List<string>))
                 {
                     var list = property.GetValue(this) as List<string>;
                     if (list != null && list.Any())
                         return true;
                 }
-                if (property.PropertyType == typeof(DateTime?))
-                {
-                    var date = property.GetValue(this) as DateTime?;
-                    if (date != null)
-                        return true;
-                }
+                if (property.GetValue(this) != null) 
+                    return true;
             }
         }
 
@@ -120,23 +103,14 @@ public abstract class Filter<TModel> where TModel : class
             var hasFilterAttribute = Attribute.IsDefined(property, typeof(FilterMemberAttribute));
             if (hasFilterAttribute)
             {
-                if (property.PropertyType == typeof(string))
-                {
-                    if (string.IsNullOrEmpty(property.GetValue(this) as string))
-                        return false;
-                }
                 if (property.PropertyType == typeof(List<string>))
                 {
                     var list = property.GetValue(this) as List<string>;
                     if (list is null || !list.Any())
                         return false;
                 }
-                if (property.PropertyType == typeof(DateTime?))
-                {
-                    var date = property.GetValue(this) as DateTime?;
-                    if (date is null)
-                        return false;
-                }
+                if(property.GetValue(this) == null)
+                    return false;
             }
         }
 
@@ -290,4 +264,12 @@ public abstract class Filter<TModel> where TModel : class
 
         return predicate.IsStarted ? predicate : null;
     }
+    
+    private bool IsAllowedType(Type type) =>
+        type == typeof(string) ||
+        type == typeof(List<string>) ||
+        type == typeof(DateTime) || type == typeof(DateTime?) ||
+        type == typeof(double) || type == typeof(double?) ||
+        type == typeof(int) || type == typeof(int?);
+
 }
