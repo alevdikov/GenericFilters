@@ -178,6 +178,130 @@ In that case we can apply the following approach:
 When we call either GetQueryExpression or FilterBy, that custom Linq Expression will be added to the end of 
 Expression generated for our 'standard' filter behind the scene.
 
+Here is an example of using that approach to filter by ProductItem type property:
+
+### 1. Define a Model
+
+```csharp
+public class Product
+{
+    public string Name { get; init; }
+    public List<string> Tags { get; init; }
+    public double UnitPrice { get; init; } 
+    public List<ProductItem> Items { get; init; }
+    public DateTime CreatedAt { get; init; }
+};
+
+public record ProductItem (string SKU, int Quantity);
+```
+
+### 2. Define a Filter
+
+```csharp
+using System.Linq.Expressions;
+using GenericFilters;
+using LinqKit;
+
+public class ProductFilter : Filter<Product>
+{
+    [FilterMember]
+    public string Name { get; init; }
+
+    [FilterMember(stringComparisonMethod: StringComparisonMethod.Contains, stringComparisonIgnoreCase: true)]
+    public List<string> Tags { get; init; }
+    
+    [FilterMember(ignoreInQueryExpression: true)]
+    public List<string> Items { get; init; }
+    
+    [FilterMember("UnitPrice", comparisonOperation: ComparisonOperation.GreaterThanOrEqual)]
+    public double? PriceFrom { get; init; }
+    
+    [FilterMember("UnitPrice", comparisonOperation: ComparisonOperation.LessThan)]
+    public double? PriceTo { get; init; }
+
+    [FilterMember("CreatedAt", comparisonOperation: ComparisonOperation.GreaterThanOrEqual)]
+    public DateTime? StartDate { get; init; }
+
+    [FilterMember("CreatedAt", comparisonOperation: ComparisonOperation.LessThanOrEqual)]
+    public DateTime? EndDate { get; init; }
+    
+    protected override Expression<Func<Product, bool>> GetQueryExpressionExt(FilterOptions filterOptions)
+    {
+        var predicate = PredicateBuilder.New<Product>();
+        
+        // Build custom behaviour for Items using LinqKit
+        predicate.And(i => Items
+            .Any(t => i.Items.Any(i => i.SKU == t)));
+        
+        return predicate;
+    }
+}
+```
+
+### 3. Apply the Filter
+
+```csharp
+using GenericFilters.Extensions;
+
+var products = new List<Product>
+{
+    new Product
+    {
+        Name = "External Storage Bundle",
+        Tags = new List<string> { "storage", "bundle", "external" },
+        UnitPrice = 129.99,
+        CreatedAt = new DateTime(2025, 2, 1),
+        Items = new List<ProductItem>
+        {
+            new ProductItem("HD-1001", 25),
+            new ProductItem("USB-64GB", 100),
+            new ProductItem("SD-128GB", 50)
+        }
+    },
+    new Product
+    {
+        Name = "Portable Backup Kit",
+        Tags = new List<string> { "backup", "portable", "data", "storage" },
+        UnitPrice = 89.99,
+        CreatedAt = new DateTime(2025, 2, 1),
+        Items = new List<ProductItem>
+        {
+            new ProductItem("HD-1001", 20),
+            new ProductItem("CASE-01", 30)
+        }
+    },
+    new Product
+    {
+        Name = "Hard Drive",
+        Tags = new List<string> { "storage", "hard drive" },
+        UnitPrice = 59.99,
+        CreatedAt = new DateTime(2025, 2, 1),
+        Items = new List<ProductItem>
+        {
+            new ProductItem("HD-2002", 40)
+        }
+    }
+};
+
+var filter = new ProductFilter
+{
+    Tags = [ "data", "storage" ], 
+    Items = ["HD-1001" ],
+    PriceFrom = 80.00,
+    PriceTo = 150.00,
+    StartDate = new DateTime(2025, 1, 1), 
+};
+
+var filteredProducts = products.AsQueryable()
+    .FilterBy(filter)
+    .ToList();
+```
+
+▶️ [Run this code on .NET Fiddle][dotnet]
+
+[dotnet]: https://dotnetfiddle.net/IAPBu2
+
+
 ### Pagination support
 
 There are 2 properties provided in the Filter class in order to support pagination 
