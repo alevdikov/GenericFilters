@@ -131,9 +131,9 @@ var filteredProducts = products.AsQueryable()
     .ToList();
 ```
 
-▶️ [Run this code on .NET Fiddle][dotnet]
+▶️ [Run this code on .NET Fiddle][dotnet1]
 
-[dotnet]: https://dotnetfiddle.net/id3pVo
+[dotnet1]: https://dotnetfiddle.net/id3pVo
 
 ---
 
@@ -297,9 +297,9 @@ var filteredProducts = products.AsQueryable()
     .ToList();
 ```
 
-▶️ [Run this code on .NET Fiddle][dotnet]
+▶️ [Run this code on .NET Fiddle][dotnet2]
 
-[dotnet]: https://dotnetfiddle.net/IAPBu2
+[dotnet2]: https://dotnetfiddle.net/IAPBu2
 
 
 ### Pagination support
