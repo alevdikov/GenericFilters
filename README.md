@@ -301,6 +301,61 @@ var filteredProducts = products.AsQueryable()
 
 [dotnet2]: https://dotnetfiddle.net/IAPBu2
 
+### LogicalOperation
+`FilterMember` attribute supports LogicalOperation parameter. 
+By default, all properties are selected using `And` logic. 
+There is also `Or` option available. But we should be careful in case of mixing `And` and `Or` together.
+Since there is no grouping option available, it depends on attributes order, 
+so we need to take that order and logical operations priority into account.
+Otherwise, we may end-up with non-deterministic result.
+
+```csharp
+public record TestModel(string Prop1, string Prop2, string Prop3, string Prop4);
+
+public class TestFilter : Filter<TestModel>
+{
+    [FilterMember]
+    public string Prop1 { get; init; }
+    
+    [FilterMember(logicalOperation: LogicalOperation.Or)]
+    public string Prop2 { get; init; }
+    
+    [FilterMember]
+    public string Prop3 { get; init; }
+    
+    [FilterMember(logicalOperation: LogicalOperation.Or)]
+    public string Prop4 { get; init; }
+}
+
+var model = new List<TestModel> { new TestModel("a", "b", "c", "d") };
+var filter = new TestFilter
+{
+    Prop1 = "a",
+    Prop2 = "b",
+    Prop3 = "c",
+    Prop4 = "z",
+};
+
+var query = filter.GetQueryExpression();
+var result = model.AsQueryable().Where(query).ToList();
+
+Console.WriteLine(query.ToString());
+Console.WriteLine(result.Count);
+```
+
+Result:<br>
+<i>
+Param_0 => (((Param_0.Prop1.Equals("a") OrElse Param_0.Prop2.Equals("b")) AndAlso Param_0.Prop3.Equals("c")) OrElse Param_0.Prop4.Equals("z"))
+<br>
+1
+</i>
+
+▶️ [Run this code on .NET Fiddle][dotnet3]
+
+[dotnet3]: https://dotnetfiddle.net/p0iFmB
+
+In order to avoid such sort of issues, 
+it is recommended approach to provide our custom logic in the GetQueryExpressionExt method.
 
 ### Pagination support
 
