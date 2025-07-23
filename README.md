@@ -379,7 +379,7 @@ var filteredProducts = products.AsQueryable()
 
 ## 🧪 Validation & Safety
 
-- Only supports `string`, `List<string>`, `DateTime`, `double` and `int` filter types, with nullables
+- Only supports `string`, `List<string>`, `DateTime`, `double`, `decimal` and `int` filter types, with nullables
 - No nested properties supported
 - Throws `FilterException` for unsupported types or misconfigurations
 - Ensures at least one valid filter is defined
@@ -390,7 +390,7 @@ var filteredProducts = products.AsQueryable()
 
 - Not all features are compatible with `IQueryable` in Entity Framework
 - Case-insensitive filtering may impact performance if DB collation is not case-sensitive
-- You can override `GetQueryExpression()` for custom logic
+- You can override `GetQueryExpressionExt()` for custom logic
 
 ---
 

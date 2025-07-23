@@ -2,7 +2,7 @@ using Xunit;
 
 namespace GenericFilters.Tests;
 
-public class FilterExpressions_Test
+public class FilterExpressionsTest
 {
     #region String expressions methods tests
 
@@ -234,6 +234,62 @@ public class FilterExpressions_Test
     }
 
     [Theory]
+    [InlineData(7.7, 7.7, ComparisonOperation.Equality, true)]
+    [InlineData(7.8, 7.7, ComparisonOperation.GreaterThan, true)]
+    [InlineData(7.8, 7.7, ComparisonOperation.GreaterThanOrEqual, true)]
+    [InlineData(7.7, 7.7, ComparisonOperation.GreaterThanOrEqual, true)]
+    [InlineData(7.6, 7.7, ComparisonOperation.LessThan, true)]
+    [InlineData(7.6, 7.7, ComparisonOperation.LessThanOrEqual, true)]
+    [InlineData(7.7, 7.7, ComparisonOperation.LessThanOrEqual, true)]
+    [InlineData(7.7, 7.7, ComparisonOperation.Inequality, false)]
+    public void GetComparisonExpression_Decimal_Test(
+        decimal modelValue,
+        decimal filterValue,
+        ComparisonOperation operation,
+        bool expectedResult)
+    {
+        var model = new TestModelWithDecimalNumber { Number = modelValue };
+        
+        var expression = FilterExpressions<TestModelWithDecimalNumber>.GetComparisonExpression("Number", filterValue, operation);
+        var func = expression.Compile();
+
+        var result = func(model);
+
+        Assert.Equal(expectedResult, result);
+    }
+    
+    public static IEnumerable<object[]> NullableDecimalComparisonData =>
+        new List<object[]>
+        {
+            new object[] { (decimal?)7.7m, (decimal?)7.7m, ComparisonOperation.Equality, true },
+            new object[] { (decimal?)7.8m, (decimal?)7.7m, ComparisonOperation.GreaterThan, true },
+            new object[] { (decimal?)7.8m, (decimal?)7.7m, ComparisonOperation.GreaterThanOrEqual, true },
+            new object[] { (decimal?)7.7m, (decimal?)7.7m, ComparisonOperation.GreaterThanOrEqual, true },
+            new object[] { (decimal?)7.6m, (decimal?)7.7m, ComparisonOperation.LessThan, true },
+            new object[] { (decimal?)7.6m, (decimal?)7.7m, ComparisonOperation.LessThanOrEqual, true },
+            new object[] { (decimal?)7.7m, (decimal?)7.7m, ComparisonOperation.LessThanOrEqual, true },
+            new object[] { (decimal?)7.7m, (decimal?)7.7m, ComparisonOperation.Inequality, false },
+        };
+    
+    [Theory]
+    [MemberData(nameof(NullableDecimalComparisonData))]
+    public void GetComparisonExpression_Decimal_Nullable_Test(
+        decimal? modelValue,
+        decimal? filterValue,
+        ComparisonOperation operation,
+        bool expectedResult)
+    {
+        var model = new TestModelWithDecimalNumber { NullableNumber = modelValue };
+
+        var expression = FilterExpressions<TestModelWithDecimalNumber>.GetComparisonExpression("NullableNumber", filterValue, operation);
+        var func = expression.Compile();
+
+        var result = func(model);
+
+        Assert.Equal(expectedResult, result);
+    }
+    
+    [Theory]
     [InlineData(7, 7, ComparisonOperation.Equality, true)]
     [InlineData(8, 7, ComparisonOperation.GreaterThan, true)]
     [InlineData(8, 7, ComparisonOperation.GreaterThanOrEqual, true)]
@@ -307,6 +363,12 @@ public class FilterExpressions_Test
     {
         public double Number { get; init; }
         public double? NullableNumber { get; init; }
+    }
+
+    private class TestModelWithDecimalNumber
+    {
+        public decimal Number { get; init; }
+        public decimal? NullableNumber { get; init; }
     }
 
     private class TestModelWithIntegerNumber

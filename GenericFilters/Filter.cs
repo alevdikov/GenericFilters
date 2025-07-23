@@ -237,6 +237,22 @@ public abstract class Filter<TModel> where TModel : class
                     var expression = FilterExpressions<TModel>.GetComparisonExpression(propertyName, value, attribute.ComparisonOperation);
                     predicate.And(expression);
                 }
+                else if (filterProperty.PropertyType == typeof(decimal?))
+                {
+                    var number = filterProperty.GetValue(this) as decimal?;
+                    if (number.HasValue)
+                    {
+                        var value = modelProperty.PropertyType == typeof(decimal) ? number.Value : number;
+                        var expression = FilterExpressions<TModel>.GetComparisonExpression(propertyName, value, attribute.ComparisonOperation);
+                        predicate.And(expression);
+                    }
+                }
+                else if (filterProperty.PropertyType == typeof(decimal))
+                {
+                    var value = (decimal)filterProperty.GetValue(this); 
+                    var expression = FilterExpressions<TModel>.GetComparisonExpression(propertyName, value, attribute.ComparisonOperation);
+                    predicate.And(expression);
+                }
                 else if (filterProperty.PropertyType == typeof(int?)) 
                 {
                     var number = filterProperty.GetValue(this) as int?;
@@ -265,11 +281,12 @@ public abstract class Filter<TModel> where TModel : class
         return predicate.IsStarted ? predicate : null;
     }
     
-    private bool IsAllowedType(Type type) =>
+    private static bool IsAllowedType(Type type) =>
         type == typeof(string) ||
         type == typeof(List<string>) ||
         type == typeof(DateTime) || type == typeof(DateTime?) ||
         type == typeof(double) || type == typeof(double?) ||
+        type == typeof(decimal) || type == typeof(decimal?) ||
         type == typeof(int) || type == typeof(int?);
 
 }
