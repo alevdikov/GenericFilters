@@ -138,21 +138,21 @@ public abstract class Filter<TModel> where TModel : class
         var predicate = PredicateBuilder.New<TModel>();
         foreach (var filterProperty in GetType().GetProperties())
         {
-            var attribute = filterProperty.GetCustomAttribute(typeof(FilterMemberAttribute)) as FilterMemberAttribute;
-            if (attribute != null)
+            if (filterProperty.GetCustomAttribute(typeof(FilterMemberAttribute)) is FilterMemberAttribute attribute)
             {
                 if (attribute.IgnoreInQueryExpression) continue;
 
                 var propertyName = attribute.Name ?? filterProperty.Name;
                 
-                var modelProperty = typeof(TModel).GetProperty(propertyName);
+                var modelProperty = GetModelProperty(propertyName);
                 if (modelProperty == null)
                 {
                     if (filterOptions == null || !filterOptions.Optimistic)
-                    {
-                        string error = $"Model doesn't contain property with name {propertyName} required by Filter." +
-                          " You need to add that property, decorate it in the Filter using FilterMember attribute," +
-                          " or provide custom implementation for GetQueryExpression() method";
+                    { 
+                        string error = $"Model doesn't contain any property with name {propertyName} required by Filter," + 
+                                     " or corresponding property path doesn't exist." +             
+                                     " You need to add that property, decorate it in the Filter class using FilterMember attribute," +
+                                     " or provide custom implementation for GetQueryExpression() method";
                         throw new FilterException(error);
                     }
                     continue;
@@ -280,7 +280,24 @@ public abstract class Filter<TModel> where TModel : class
 
         return predicate.IsStarted ? predicate : null;
     }
-    
+
+    private PropertyInfo GetModelProperty(string propertyPath)
+    {
+        var currentType = typeof(TModel);
+        PropertyInfo propertyInfo = null;
+
+        foreach (var item in propertyPath.Split('.'))
+        {
+            propertyInfo = currentType.GetProperty(item);
+            if (propertyInfo == null)
+                return null;
+
+            currentType = propertyInfo.PropertyType;
+        }
+
+        return propertyInfo;
+    }
+
     private static bool IsAllowedType(Type type) =>
         type == typeof(string) ||
         type == typeof(List<string>) ||

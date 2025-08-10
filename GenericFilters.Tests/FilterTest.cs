@@ -179,6 +179,8 @@ public class FilterTest
         Assert.False(filter3.All());
     }
 
+    #region GetQueryExpression tests
+    
     [Fact]
     public void GetQueryExpression_StringEmpty_Test()
     {
@@ -434,6 +436,53 @@ public class FilterTest
     }
 
     [Fact]
+    public void GetQueryExpression_Nested_Test()
+    {
+        #region Prepare data
+
+        var filter = new TestFilterNested
+        {
+            Items = [ "Item 1", "Item 2" ]
+        };
+
+        var models = new List<TestModel3>
+        {
+            new()
+            {
+                Id = "1",
+                Item = new TestModelNested
+                {
+                    NestedItems = [ "Item 1" , "Item 1.1" ]
+                }
+            },
+            new()
+            {
+                Id = "2",
+                Item = new TestModelNested
+                {
+                    NestedItems = [ "Item 2" , "Item 2.1" ]
+                }
+            },
+            new()
+            {
+                Id = "3",
+                Item = new TestModelNested
+                {
+                    NestedItems = [ "Item 3" , "Item 3.1" ]
+                }
+            }
+        };
+
+        #endregion
+
+        var expected = models.Where(i => i is { Id:  "1" or "2"});
+        var expression = filter.GetQueryExpression();
+        var result = models.AsQueryable().Where(expression);
+
+        Assert.Equal(expected, result);
+    }
+    
+    [Fact]
     public void GetQueryExpression_DefaultLogic_Test()
     {
         #region Prepare data
@@ -577,6 +626,8 @@ public class FilterTest
 
         Assert.Equal(expected, result);
     }
+    
+    #endregion
 }
 
 
@@ -646,6 +697,15 @@ public class TestFilterDateNullable1 : Filter<TestModelDateNullable>
     public DateTime? Date { get; set; }
 }
 
+public class TestFilterNested : Filter<TestModel3>
+{
+    [FilterMember]
+    public string Id { get; init; }
+
+    [FilterMember("Item.NestedItems")]
+    public List<string> Items { get; init; }
+}
+
 public class TestFilterDefaultLogic : Filter<TestModel1>
 {
     [FilterMember]
@@ -709,6 +769,17 @@ public class TestModel2
 {
     public string Id { get; set; }
     public List<string> Items1 { get; set; }
+}
+
+public class TestModel3
+{
+    public string Id { get; init; }
+    public TestModelNested Item { get; init; }
+}
+
+public class TestModelNested
+{
+    public List<string> NestedItems { get; init; }
 }
 
 public class TestModelDateNullable

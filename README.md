@@ -111,7 +111,7 @@ var products = new List<Product>
 var filter = new ProductFilter
 {
     Name = "book", 
-    Tags = [ "education", "programing1" ], 
+    Tags = [ "education", "engineering" ], 
     PriceFrom = 40.00,
     PriceTo = 100.00,
     StartDate = new DateTime(2025, 2, 1), 
@@ -391,11 +391,5 @@ var filteredProducts = products.AsQueryable()
 - Not all features are compatible with `IQueryable` in Entity Framework
 - Case-insensitive filtering may impact performance if DB collation is not case-sensitive
 - You can override `GetQueryExpressionExt()` for custom logic
-
----
-
-## 📄 License
-
-MIT License
 
 ---
