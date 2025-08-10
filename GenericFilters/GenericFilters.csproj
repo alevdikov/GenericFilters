@@ -9,6 +9,7 @@
     <PackageLicense>http://www.apache.org/licenses/LICENSE-2.0</PackageLicense>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <RepositoryUrl>https://github.com/alevdikov/GenericFilters</RepositoryUrl>
     <Description>
     A powerful and extensible filtering framework for C# applications. 
     GenericFilters enables dynamic, attribute-driven filtering logic for LINQ queries, in-memory collections, and Cosmos DB SDK queries.
