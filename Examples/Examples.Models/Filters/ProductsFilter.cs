@@ -8,7 +8,7 @@ public class ProductsFilter : Filter<Product>
     [FilterMember]
     public string Name { get; init; }
 
-    [FilterMember(ignoreInQueryExpression: true)]
+    [FilterMember("Category.Name")]
     public List<string> ProductCategories { get; init; }
 
     [FilterMember(stringComparisonMethod: StringComparisonMethod.Contains, stringComparisonIgnoreCase: true)]

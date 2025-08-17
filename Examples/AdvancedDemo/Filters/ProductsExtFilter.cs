@@ -4,7 +4,7 @@ using Examples.Models.Models;
 using GenericFilters;
 using LinqKit;
 
-namespace AdvancedDemo.Models;
+namespace AdvancedDemo.Filters;
 
 public class ProductsExtFilter : ProductsFilter
 {
@@ -12,13 +12,12 @@ public class ProductsExtFilter : ProductsFilter
     {
         var predicate = PredicateBuilder.New<Product>();
         
-        // Build custom behaviour for ProductCategories and Tags using LinqKit
-        var categories = ProductCategories.ConvertAll(i => i.ToLower());
-        predicate.And(i => categories.Contains(i.Category.Name.ToLower()));
-        
+        // Provide custom behaviour for Tags using LinqKit
+        // Note: We can achieve the same result using nested property name
+        // in the FilterMember attribute
         var tags = Tags.ConvertAll(i => i.ToLower());
-        predicate.And(i => tags
-            .Any(t => i.Tags.Any(i => i.Name.Equals(t.ToLower()))));
+        predicate.And(p => tags
+            .Any(t => p.Tags.Any(i => i.Name.Equals(t.ToLower()))));
         
         return predicate;
     }

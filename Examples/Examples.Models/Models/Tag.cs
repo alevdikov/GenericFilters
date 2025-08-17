@@ -5,11 +5,11 @@ namespace Examples.Models.Models;
 public class Tag
 {
     [Key]
-    public int TagId { get; set; }
+    public int TagId { get; init; }
 
     [Required]
-    public string Name { get; set; }
+    public string Name { get; init; }
 
-    public int ProductId { get; set; }
-    public Product Product { get; set; }
+    public int ProductId { get; init; }
+    public Product Product { get; init; }
 }

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 // Define a filter
 var filter = new ProductsFilter
 {
+    ProductCategories = new() {"Electronics", "Home & Kitchen"},
     Description = "favorite",
     PriceTo = 200,
     StartDate = new DateTime(2025, 01, 01),

@@ -1,4 +1,4 @@
-﻿using AdvancedDemo.Models;
+﻿using AdvancedDemo.Filters;
 using Examples.Models;
 using GenericFilters.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 // Define a filter
 var filter = new ProductsExtFilter
 {
-    ProductCategories = new() {"electronics", "home & kitchen"},
+    ProductCategories = new() {"Electronics", "Home & Kitchen"},
     Tags = new() {"new", "trending"},
     Description = "favorite",
     PriceTo = 200,
