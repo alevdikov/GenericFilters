@@ -171,35 +171,33 @@ Starting from ver. 1.1.0 GenericFilters supports nested properties using dot '.'
 ### 1. Define a Model
 
 ```csharp
+public record Category(int Id, string Name);
+
 public class Product
 {
     public string Name { get; init; }
+	public Category Category { get; init; }
     public List<string> Tags { get; init; }
     public double UnitPrice { get; init; } 
-    public List<ProductItem> Items { get; init; }
     public DateTime CreatedAt { get; init; }
 };
-
-public record ProductItem (string Sku, int Quantity);
 ```
 
 ### 2. Define a Filter
 
 ```csharp
-using System.Linq.Expressions;
 using GenericFilters;
-using LinqKit;
 
 public class ProductFilter : Filter<Product>
 {
     [FilterMember]
     public string Name { get; init; }
 
-    [FilterMember(stringComparisonMethod: StringComparisonMethod.Contains, stringComparisonIgnoreCase: true)]
+    [FilterMember("Category.Name")]
+    public string Category { get; init; }
+
+	[FilterMember(stringComparisonMethod: StringComparisonMethod.Contains, stringComparisonIgnoreCase: true)]
     public List<string> Tags { get; init; }
-    
-    [FilterMember("Items.Sku")]
-    public List<string> Items { get; init; }
     
     [FilterMember("UnitPrice", comparisonOperation: ComparisonOperation.GreaterThanOrEqual)]
     public double? PriceFrom { get; init; }
@@ -220,50 +218,40 @@ public class ProductFilter : Filter<Product>
 ```csharp
 using GenericFilters.Extensions;
 
+var category = new Category(1, "storage");
+		
 var products = new List<Product>
 {
     new Product
     {
         Name = "External Storage Bundle",
+        Category = category,
         Tags = new List<string> { "storage", "bundle", "external" },
         UnitPrice = 129.99,
-        CreatedAt = new DateTime(2025, 2, 1),
-        Items = new List<ProductItem>
-        {
-            new ProductItem("HD-1001", 25),
-            new ProductItem("USB-64GB", 100),
-            new ProductItem("SD-128GB", 50)
-        }
+        CreatedAt = new DateTime(2025, 2, 1)
     },
     new Product
     {
         Name = "Portable Backup Kit",
+        Category = null,
         Tags = new List<string> { "backup", "portable", "data", "storage" },
         UnitPrice = 89.99,
-        CreatedAt = new DateTime(2025, 2, 1),
-        Items = new List<ProductItem>
-        {
-            new ProductItem("HD-1001", 20),
-            new ProductItem("CASE-01", 30)
-        }
+        CreatedAt = new DateTime(2025, 2, 1)
     },
     new Product
     {
         Name = "Hard Drive",
+        Category = category,
         Tags = new List<string> { "storage", "hard drive" },
         UnitPrice = 59.99,
-        CreatedAt = new DateTime(2025, 2, 1),
-        Items = new List<ProductItem>
-        {
-            new ProductItem("HD-2002", 40)
-        }
+        CreatedAt = new DateTime(2025, 2, 1)
     }
 };
 
 var filter = new ProductFilter
 {
+    Category = "storage",
     Tags = [ "data", "storage" ], 
-    Items = [ "HD-1001" ],
     PriceFrom = 80.00,
     PriceTo = 150.00,
     StartDate = new DateTime(2025, 1, 1), 
@@ -411,7 +399,7 @@ var filteredProducts = products.AsQueryable()
     .ToList();
 ```
 
-▶️ [Run this code on .NET Fiddle][dotnet2]
+▶️ [Run this code on .NET Fiddle][dotnet3]
 
 [dotnet3]: https://dotnetfiddle.net/IAPBu2
 
@@ -464,7 +452,7 @@ Param_0 => (((Param_0.Prop1.Equals("a") OrElse Param_0.Prop2.Equals("b")) AndAls
 1
 </i>
 
-▶️ [Run this code on .NET Fiddle][dotnet3]
+▶️ [Run this code on .NET Fiddle][dotnet4]
 
 [dotnet4]: https://dotnetfiddle.net/p0iFmB
 
