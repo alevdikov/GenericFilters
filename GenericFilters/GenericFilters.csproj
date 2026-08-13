@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <PackageReference Include="LinqKit.Core" Version="1.2.8" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

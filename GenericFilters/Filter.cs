@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using GenericFilters.SqlQueryBuilder;
+using GenericFilters.SqlQueryBuilder.Dialects;
 using LinqKit;
 
 namespace GenericFilters;
@@ -117,9 +119,11 @@ public abstract class Filter<TModel> where TModel : class
         return true;
     }
 
-    protected virtual Expression<Func<TModel, bool>> GetQueryExpressionExt(FilterOptions filterOptions)
+    public string BuildSqlQuery(ISqlDialect dialect = null)
     {
-        return null;
+        var builder = new SqlQueryBuilder<TModel>();
+        var expression = GetQueryExpression();
+        return builder.BuildQuery(expression, dialect);
     }
     
     public Expression<Func<TModel, bool>> GetQueryExpression(FilterOptions filterOptions = null)
@@ -132,7 +136,12 @@ public abstract class Filter<TModel> where TModel : class
 
         return predicate;
     }
-    
+
+    protected virtual Expression<Func<TModel, bool>> GetQueryExpressionExt(FilterOptions filterOptions)
+    {
+        return null;
+    }
+
     private Expression<Func<TModel, bool>> GetQueryExpressionInt(FilterOptions filterOptions)
     {
         var predicate = PredicateBuilder.New<TModel>();
@@ -281,7 +290,7 @@ public abstract class Filter<TModel> where TModel : class
         return predicate.IsStarted ? predicate : null;
     }
 
-    private PropertyInfo GetModelProperty(string propertyPath)
+    private static PropertyInfo GetModelProperty(string propertyPath)
     {
         var currentType = typeof(TModel);
         PropertyInfo propertyInfo = null;

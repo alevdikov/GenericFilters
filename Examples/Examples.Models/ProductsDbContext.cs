@@ -8,6 +8,7 @@ public class ProductsDbContext : DbContext
 {
     public DbSet<Category> Categories { get; init; }
     public DbSet<Product> Products { get; init; }
+    public DbSet<Tag> Tags { get; init; }
 
     private static readonly ILoggerFactory logger = LoggerFactory.Create(builder => { builder.AddConsole(); });
 

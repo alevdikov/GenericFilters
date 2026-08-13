@@ -27,6 +27,7 @@ Install-Package GenericFilters
 - 🧰 Customizable filter behavior with `FilterOptions`
 - 🧪 Built-in validation and error handling
 - ⚙️ Expression tree generation for LINQ queries
+- 🛢️ Raw SQL generation from a `Filter` via `BuildSqlQuery()`, with dialect, join and `EXISTS`-subquery support
 
 ---
 
@@ -492,5 +493,137 @@ var filteredProducts = products.AsQueryable()
 - Not all features are compatible with `IQueryable` in Entity Framework
 - Case-insensitive filtering may impact performance if DB collation is not case-sensitive
 - You can override `GetQueryExpressionExt()` for custom logic
+
+---
+
+## 🛢️ SQL Query Builder
+
+Besides generating LINQ expressions, a `Filter` can produce a ready-to-run SQL `SELECT` statement directly, via `BuildSqlQuery()`. This is useful when you want to run the query as raw SQL (e.g. EF Core's `FromSqlRaw`/`Database.SqlQuery`, Dapper, plain ADO.NET) instead of going through `IQueryable`.
+
+### 1. Define a Model
+
+```csharp
+using System.ComponentModel.DataAnnotations;
+
+public class Category
+{
+    [Key]
+    public int CategoryId { get; init; }
+    public string Name { get; init; }
+}
+
+public class Product
+{
+    [Key]
+    public int ProductId { get; init; }
+    public int CategoryId { get; init; }
+    public Category Category { get; init; }
+    public string Name { get; init; }
+    public string Description { get; init; }
+    public double UnitPrice { get; init; }
+    public DateTime DateAdded { get; init; }
+}
+```
+
+### 2. Define a Filter
+
+```csharp
+using GenericFilters;
+
+public class ProductsFilter : Filter<Product>
+{
+    [FilterMember("Category.Name")]
+    public List<string> ProductCategories { get; init; }
+
+    [FilterMember(stringComparisonMethod: StringComparisonMethod.Contains, stringComparisonIgnoreCase: true)]
+    public string Description { get; init; }
+
+    [FilterMember("UnitPrice", comparisonOperation: ComparisonOperation.LessThan)]
+    public double? PriceTo { get; init; }
+
+    [FilterMember("DateAdded", comparisonOperation: ComparisonOperation.GreaterThanOrEqual)]
+    public DateTime? StartDate { get; init; }
+}
+```
+
+### 3. Build the SQL query
+
+```csharp
+using GenericFilters.SqlQueryBuilder.Dialects;
+
+var filter = new ProductsFilter
+{
+    ProductCategories = new() { "Electronics", "Home & Kitchen" },
+    Description = "favorite",
+    PriceTo = 200,
+    StartDate = new DateTime(2025, 01, 01)
+};
+
+var sqlQuery = filter.BuildSqlQuery(new SqliteDialect());
+```
+
+Generated SQL:
+
+```sql
+SELECT "p"."ProductId", "p"."CategoryId", "p"."DateAdded", "p"."Description", "p"."Name", "p"."UnitPrice"
+FROM "Products" AS "p"
+INNER JOIN "Categories" AS "c" ON "p"."CategoryId" = "c"."CategoryId"
+WHERE "c"."Name" IN ('Electronics', 'Home & Kitchen') AND instr(lower("p"."Description"), 'favorite') > 0 AND "p"."UnitPrice" < 200.0 AND "p"."DateAdded" >= '2025-01-01 00:00:00'
+```
+
+You can then run it directly, e.g. with EF Core:
+
+```csharp
+var filteredProducts = context.Products.FromSqlRaw(sqlQuery);
+```
+
+▶️ Full runnable example: [SqlBuilderBasicDemo](Examples/SqlBuilderBasicDemo/Program.cs)
+
+### Dialects
+
+`BuildSqlQuery` takes an `ISqlDialect`, which controls identifier quoting, literal formatting, table/column naming, and how `Contains`/`StartsWith`/`EndsWith` string predicates are rendered. `AnsiSqlDialect` is the default; `SqliteDialect` is provided out of the box and can be used as a template for other databases (Postgres, SQL Server, etc.) by overriding just the members that differ:
+
+```csharp
+public class SqliteDialect : AnsiSqlDialect
+{
+    public override string BuildContainsPredicate(string columnSql, string value, bool ignoreCase) =>
+        ignoreCase
+            ? $"instr(lower({columnSql}), '{EscapeString(value.ToLowerInvariant())}') > 0"
+            : $"instr({columnSql}, '{EscapeString(value)}') > 0";
+}
+```
+
+### Joins
+
+Filters on nested properties (e.g. `[FilterMember("Category.Name")]`) are automatically translated into an `INNER JOIN`, resolved by convention from the navigation property's `[Key]` and a matching `{Nav}Id` / `{Nav}{Key}` foreign key on the model - the same convention EF Core itself uses.
+
+### Filtering by a collection navigation (Any / EXISTS)
+
+Custom logic added via [`GetQueryExpressionExt`](#getqueryexpressionext-method) that calls `.Any()` on a `List<T>` navigation property is translated into a correlated `EXISTS` subquery:
+
+```csharp
+protected override Expression<Func<Product, bool>> GetQueryExpressionExt(FilterOptions filterOptions)
+{
+    var predicate = PredicateBuilder.New<Product>();
+    var tags = Tags.ConvertAll(i => i.ToLower());
+    predicate.And(p => tags.Any(t => p.Tags.Any(i => i.Name.Equals(t))));
+    return predicate;
+}
+```
+
+generates:
+
+```sql
+... AND (EXISTS (SELECT 1 FROM "Tags" AS "t" WHERE "t"."ProductId" = "p"."ProductId" AND "t"."Name" = LOWER('new'))
+      OR EXISTS (SELECT 1 FROM "Tags" AS "t2" WHERE "t2"."ProductId" = "p"."ProductId" AND "t2"."Name" = LOWER('trending')))
+```
+
+▶️ Full runnable example: [SqlBuilderAdvancedDemo](Examples/SqlBuilderAdvancedDemo/Program.cs)
+
+### Limitations
+
+- Only `INNER JOIN` for to-one navigations, resolved by naming convention (no explicit mapping configuration)
+- No `Skip`/`Take` support yet - `StartIndex`/`PageSize` are ignored by `BuildSqlQuery`
+- Intended as a lightweight, best-effort SQL generator, not a full query-translation engine like EF Core's
 
 ---
